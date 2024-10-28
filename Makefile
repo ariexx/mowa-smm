@@ -47,3 +47,9 @@ watch:
 	}"
 
 .PHONY: all build run test clean watch docker-run docker-down itest
+
+
+inject:
+	@echo "Run wire to inject dependencies"
+	@cd injector && wire
+	@echo "Dependencies injected"
