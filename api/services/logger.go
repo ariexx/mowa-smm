@@ -9,6 +9,7 @@ import (
 
 type LoggerService interface {
 	PrintStdout(ctx context.Context, level zapcore.Level, message string, fields ...zapcore.Field)
+	handleError(ctx context.Context, err error)
 }
 
 type loggerService struct {
@@ -16,24 +17,35 @@ type loggerService struct {
 }
 
 func NewLoggerService() LoggerService {
-	//check env
-	if os.Getenv("APP_ENV") == "production" {
-		logger, _ := zap.NewProduction()
-		return &loggerService{
-			log: logger,
-		}
-	}
-
 	return &loggerService{
-		log: zap.Must(zap.NewDevelopment()),
+		log: initializeLogger(),
 	}
 }
 
+func initializeLogger() *zap.Logger {
+	if isProduction() {
+		logger, _ := zap.NewProduction()
+		return logger
+	}
+	return zap.Must(zap.NewDevelopment())
+}
+
+func isProduction() bool {
+	return os.Getenv("APP_ENV") == "production"
+}
+
 func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, message string, fields ...zapcore.Field) {
+	// Add context fields
+	fields = append(fields, zapcore.Field{Key: "request_id", Type: zapcore.StringType, String: ctx.Value("requestid").(string)})
+	fields = append(fields, zapcore.Field{Key: "request_uri", Type: zapcore.StringType, String: ctx.Value("request_uri").(string)})
+	fields = append(fields, zapcore.Field{Key: "request_method", Type: zapcore.StringType, String: ctx.Value("request_method").(string)})
+	fields = append(fields, zapcore.Field{Key: "request_ip", Type: zapcore.StringType, String: ctx.Value("request_ip").(string)})
+
 	switch level {
 	case zapcore.DebugLevel:
 		l.log.Debug(message, fields...)
 	case zapcore.InfoLevel:
+
 		l.log.Info(message, fields...)
 	case zapcore.WarnLevel:
 		l.log.Warn(message, fields...)
@@ -45,5 +57,7 @@ func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, me
 }
 
 func (l *loggerService) handleError(ctx context.Context, err error) {
-
+	if err != nil {
+		l.PrintStdout(ctx, zapcore.ErrorLevel, "error", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
+	}
 }

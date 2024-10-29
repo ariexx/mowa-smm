@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -11,7 +12,7 @@ import (
 
 type FiberServer struct {
 	*fiber.App
-
+	context.Context
 	db database.Service
 }
 
@@ -23,7 +24,8 @@ func New() *FiberServer {
 			StrictRouting: true,
 			ErrorHandler:  ErrorHandler,
 		}),
-		db: database.New(),
+		Context: context.Background(),
+		db:      database.New(),
 	}
 
 	return server

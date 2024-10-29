@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.uber.org/zap/zapcore"
 	db "mowa-backend/db/sqlc"
+	"mowa-backend/internal/database"
 )
 
 type UserService interface {
@@ -13,19 +14,20 @@ type UserService interface {
 }
 
 type userService struct {
-	queries *db.Queries
-	log     LoggerService
+	*db.Queries
+	log LoggerService
 }
 
-func NewUserService(queries *db.Queries) UserService {
+func NewUserService() UserService {
 	return &userService{
-		queries: queries,
+		Queries: db.New(database.New().DB()),
 		log:     NewLoggerService(),
 	}
 }
 
 func (u *userService) GetUser(ctx context.Context, id uint32) (db.User, error) {
-	user, err := u.queries.GetUser(ctx, id)
+
+	user, err := u.Queries.GetUser(ctx, id)
 	if err != nil {
 		u.log.PrintStdout(ctx, zapcore.ErrorLevel, "GetUser", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
 		return db.User{}, err
@@ -35,11 +37,20 @@ func (u *userService) GetUser(ctx context.Context, id uint32) (db.User, error) {
 }
 
 func (u *userService) GetUserByEmail(ctx context.Context, email string) (db.User, error) {
-	//TODO implement me
-	panic("implement me")
+	user, err := u.Queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		u.log.PrintStdout(ctx, zapcore.ErrorLevel, "GetUserByEmail", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
+		return db.User{}, err
+	}
+
+	return user, nil
 }
 
 func (u *userService) IsUserActive(ctx context.Context, id uint32) bool {
-	//TODO implement me
-	panic("implement me")
+	user, err := u.GetUser(ctx, id)
+	if err != nil {
+		return false
+	}
+
+	return !user.DeletedAt.Valid
 }

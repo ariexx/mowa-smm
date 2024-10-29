@@ -7,11 +7,16 @@ import (
 )
 
 type UserController interface {
-	GetUser(ctx *fiber.Ctx, id uint32) error
+	Route(router fiber.Router)
+	GetUser(ctx *fiber.Ctx) error
 }
 
 type userController struct {
 	service services.UserService
+}
+
+func (u *userController) Route(router fiber.Router) {
+	router.Get("/:id", u.GetUser)
 }
 
 func NewUserController(service services.UserService) UserController {
@@ -20,7 +25,7 @@ func NewUserController(service services.UserService) UserController {
 	}
 }
 
-func (u *userController) GetUser(ctx *fiber.Ctx, id uint32) error {
+func (u *userController) GetUser(ctx *fiber.Ctx) error {
 	userId := uint32(1)
 	user, err := u.service.GetUser(ctx.Context(), userId)
 	if err != nil {
