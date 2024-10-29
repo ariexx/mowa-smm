@@ -61,7 +61,6 @@ func (f *FiberServer) logger() fiber.Handler {
 
 func (f *FiberServer) recover() fiber.Handler {
 	return recover.New(recover.Config{
-		EnableStackTrace: true,
 		StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
 			c.JSON(fiber.Map{
 				"success": false,

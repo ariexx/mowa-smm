@@ -42,7 +42,6 @@ func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, me
 	case zapcore.DebugLevel:
 		l.log.Debug(message, fields...)
 	case zapcore.InfoLevel:
-
 		l.log.Info(message, fields...)
 	case zapcore.WarnLevel:
 		l.log.Warn(message, fields...)
@@ -52,7 +51,6 @@ func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, me
 		l.log.Info(message, fields...)
 	}
 }
-
 func (l *loggerService) handleError(ctx context.Context, err error) {
 	if err != nil {
 		l.PrintStdout(ctx, zapcore.ErrorLevel, "error", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})

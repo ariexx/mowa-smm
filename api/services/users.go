@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"go.uber.org/zap/zapcore"
+	"mowa-backend/api/utils"
 	db "mowa-backend/db/sqlc"
 	"mowa-backend/internal/database"
 )
@@ -26,11 +27,16 @@ func NewUserService() UserService {
 }
 
 func (u *userService) GetUser(ctx context.Context, id uint32) (db.User, error) {
+	//check if user is admin
+	isAdmin := ctx.Value("user").(db.User).Role
+	if isAdmin != "admin" {
+		return db.User{}, utils.ErrUserNotFound
+	}
 
 	user, err := u.Queries.GetUser(ctx, id)
 	if err != nil {
 		u.log.PrintStdout(ctx, zapcore.ErrorLevel, "GetUser", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
-		return db.User{}, err
+		return db.User{}, utils.MapError(err)
 	}
 
 	return user, nil

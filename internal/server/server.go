@@ -5,27 +5,33 @@ import (
 	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"mowa-backend/api/services"
 	"mowa-backend/api/utils"
 	"mowa-backend/internal/database"
+	"os"
 	"strconv"
 )
 
 type FiberServer struct {
 	*fiber.App
 	context.Context
-	db database.Service
+	db         database.Service
+	jwtService services.JwtService
+	logService services.LoggerService
 }
 
 func New() *FiberServer {
 	server := &FiberServer{
 		App: fiber.New(fiber.Config{
-			ServerHeader:  "mowa-backend",
-			AppName:       "mowa-backend",
+			ServerHeader:  os.Getenv("APP_NAME"),
+			AppName:       os.Getenv("APP_NAME"),
 			StrictRouting: true,
 			ErrorHandler:  ErrorHandler,
 		}),
-		Context: context.Background(),
-		db:      database.New(),
+		Context:    context.Background(),
+		db:         database.New(),
+		jwtService: services.NewJwtService(),
+		logService: services.NewLoggerService(),
 	}
 
 	return server
