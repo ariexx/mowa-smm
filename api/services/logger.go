@@ -37,9 +37,6 @@ func isProduction() bool {
 func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, message string, fields ...zapcore.Field) {
 	// Add context fields
 	fields = append(fields, zapcore.Field{Key: "request_id", Type: zapcore.StringType, String: ctx.Value("requestid").(string)})
-	fields = append(fields, zapcore.Field{Key: "request_uri", Type: zapcore.StringType, String: ctx.Value("request_uri").(string)})
-	fields = append(fields, zapcore.Field{Key: "request_method", Type: zapcore.StringType, String: ctx.Value("request_method").(string)})
-	fields = append(fields, zapcore.Field{Key: "request_ip", Type: zapcore.StringType, String: ctx.Value("request_ip").(string)})
 
 	switch level {
 	case zapcore.DebugLevel:
