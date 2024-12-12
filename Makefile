@@ -57,3 +57,11 @@ inject:
 migrate:
 	@echo "Run database migration"
 	@goose up
+
+goose-status:
+	@echo "Run Goose Status"
+	@goose status
+
+goose-validate:
+	@echo "Run goose validate"
+	@goose validate

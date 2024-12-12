@@ -8,7 +8,8 @@
         updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         deleted_at timestamp NULL,
         version integer NOT NULL DEFAULT 1,
-        PRIMARY KEY (id)
+        PRIMARY KEY (id),
+        FOREIGN KEY (id) REFERENCES users(user_status_id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- +goose StatementEnd
 

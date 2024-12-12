@@ -11,12 +11,14 @@ import (
 
 type AdminService interface {
 	DashboardStatistics(ctx *fiber.Ctx) (dto.DashboardResponse, error)
+	GetLastOrder(ctx *fiber.Ctx) (dto.GetLastOrderResponse, error)
 }
 
 type adminService struct {
 	*db.Queries
 	log LoggerService
 }
+
 
 func NewAdminService() AdminService {
 	return &adminService{
@@ -36,9 +38,22 @@ func (a *adminService) DashboardStatistics(ctx *fiber.Ctx) (dto.DashboardRespons
 	}
 
 	return dto.DashboardResponse{
-		TotalUsers: int64(stats),
-		TotalOrders: int64(0),
-		TotalRevenue: int64(0),
+		TotalUsers:      int64(stats),
+		TotalOrders:     int64(0),
+		TotalRevenue:    int64(0),
 		TotalTicketOpen: int64(0),
+	}, nil
+}
+
+
+// GetLastOrder implements AdminService.
+func (a *adminService) GetLastOrder(ctx *fiber.Ctx) (dto.GetLastOrderResponse, error) {
+	order, err := a.Queries.GetLastOrder(ctx.Context())
+	if err != nil {
+		a.log.PrintStdout(ctx.Context(), zapcore.ErrorLevel, "Failed to get last order", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
+		return dto.GetLastOrderResponse{}, nil
+	}
+
+	return dto.GetLastOrderResponse{
 	}, nil
 }

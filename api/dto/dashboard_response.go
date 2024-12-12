@@ -7,3 +7,13 @@ type DashboardResponse struct {
 	TotalRevenue	int64 `json:"total_revenue"`
 	TotalTicketOpen int64 `json:"total_ticket_open"`
 }
+
+// GetLastOrderResponse - response for the last order
+type GetLastOrderResponse struct {
+	Name string `json:"name"`
+	Product string `json:"product"`
+	Total int64 `json:"total"`
+	Price int64 `json:"price"`
+	Status string `json:"status"` //Completed, Pending, Cancelled
+	Date string `json:"date"`
+}
