@@ -50,9 +50,9 @@ func New() Service {
 	if err != nil {
 		// This will not be a connection error, but a DSN parse error or
 		// another initialization error.
-		log.Fatal(err)
+		panic(err)
 	}
-	db.SetConnMaxLifetime(0)
+	db.SetConnMaxLifetime(3 * time.Minute)
 	db.SetMaxIdleConns(1)
 	db.SetMaxOpenConns(1)
 

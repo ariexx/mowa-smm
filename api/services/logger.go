@@ -2,9 +2,11 @@ package services
 
 import (
 	"context"
+	db "mowa-backend/db/sqlc"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 )
 
 type LoggerService interface {
@@ -36,7 +38,11 @@ func isProduction() bool {
 
 func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, message string, fields ...zapcore.Field) {
 	// Add context fields
-	fields = append(fields, zapcore.Field{Key: "request_id", Type: zapcore.StringType, String: ctx.Value("requestid").(string)})
+	requestID := ctx.Value("requestid").(string)
+	userID := ctx.Value("user").(db.User).ID
+
+	fields = append(fields, zap.String("request_id", requestID))
+	fields = append(fields, zap.Field{Key: "user_id", Type: zapcore.StringType, String: string(userID)})
 
 	switch level {
 	case zapcore.DebugLevel:

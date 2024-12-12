@@ -1,9 +1,10 @@
 package middlewares
 
 import (
+	"mowa-backend/api/services"
+
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap/zapcore"
-	"mowa-backend/api/services"
 )
 
 func JwtMiddleware() fiber.Handler {
@@ -43,6 +44,7 @@ func JwtMiddleware() fiber.Handler {
 
 		// Set the user in the context
 		c.Locals("user", user)
+		c.Locals("level", user.Role)
 
 		// Continue stack
 		return c.Next()

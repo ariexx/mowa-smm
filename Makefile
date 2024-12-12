@@ -5,8 +5,8 @@ all: build test
 
 build:
 	@echo "Building..."
-	
-	
+
+
 	@go build -o main.exe cmd/api/main.go
 
 # Run the application
@@ -53,3 +53,7 @@ inject:
 	@echo "Run wire to inject dependencies"
 	@cd injector && wire
 	@echo "Dependencies injected"
+
+migrate:
+	@echo "Run database migration"
+	@goose up

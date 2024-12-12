@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"mowa-backend/injector"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func (f *FiberServer) RegisterFiberRoutes() {
@@ -14,6 +15,11 @@ func (f *FiberServer) RegisterFiberRoutes() {
 	{
 		v1 := api.Group("/v1")
 		{
+			admin := v1.Group("/admin")
+			{
+				adminController := injector.InitializeAdminController()
+				adminController.Route(admin)
+			}
 			users := v1.Group("/users")
 			{
 				userController := injector.InitializeUserController()
