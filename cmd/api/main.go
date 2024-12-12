@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"mowa-backend/internal/database"
 	"mowa-backend/internal/server"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
@@ -15,6 +15,20 @@ import (
 )
 
 func initializeServer() *server.FiberServer {
+
+	// Initialize the database service
+	dbService := database.New()
+
+	// Wait for the database connection to be healthy
+	for {
+		health := dbService.Health()
+		if health["status"] == "up" {
+			break
+		}
+		log.Println("Waiting for database connection...")
+		time.Sleep(2 * time.Second)
+	}
+
 	initServer := server.New()
 	initServer.RegisterMiddlewares()
 	initServer.RegisterFiberRoutes()
@@ -22,8 +36,7 @@ func initializeServer() *server.FiberServer {
 }
 
 func startServer(fiberServer *server.FiberServer) {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	err := fiberServer.Listen(fmt.Sprintf(":%d", port))
+	err := fiberServer.Listen(fmt.Sprintf(":%s", os.Getenv("PORT")))
 	if err != nil {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}
