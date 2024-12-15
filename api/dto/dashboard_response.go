@@ -17,3 +17,7 @@ type GetLastOrderResponse struct {
 	Status string `json:"status"` //Completed, Pending, Cancelled
 	Date string `json:"date"`
 }
+
+type GetLastOrdersRequest struct {
+	Limit int32 `json:"limit" query:"limit"`
+}

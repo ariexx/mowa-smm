@@ -95,6 +95,131 @@ func (ns NullUsersStatus) Value() (driver.Value, error) {
 	return string(ns.UsersStatus), nil
 }
 
+type AppSetting struct {
+	ID        uint64       `json:"id"`
+	Name      string       `json:"name"`
+	Value     string       `json:"value"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+}
+
+type DepositCategory struct {
+	ID          uint64       `json:"id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Status      string       `json:"status"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
+	DeletedAt   sql.NullTime `json:"deleted_at"`
+	Version     int32        `json:"version"`
+}
+
+type DepositMethod struct {
+	ID                uint64       `json:"id"`
+	DepositCategoryID int64        `json:"deposit_category_id"`
+	Name              string       `json:"name"`
+	Description       string       `json:"description"`
+	MinDeposit        uint64       `json:"min_deposit"`
+	MaxDeposit        uint64       `json:"max_deposit"`
+	Rate              float64      `json:"rate"`
+	Status            string       `json:"status"`
+	CreatedAt         time.Time    `json:"created_at"`
+	UpdatedAt         time.Time    `json:"updated_at"`
+	DeletedAt         sql.NullTime `json:"deleted_at"`
+	Version           int32        `json:"version"`
+}
+
+type Order struct {
+	ID             uint64          `json:"id"`
+	IDProvider     string          `json:"id_provider"`
+	ProviderID     uint64          `json:"provider_id"`
+	UserID         uint32          `json:"user_id"`
+	Target         string          `json:"target"`
+	Total          uint64          `json:"total"`
+	BeginningValue sql.NullInt64   `json:"beginning_value"`
+	Partial        sql.NullInt64   `json:"partial"`
+	Status         string          `json:"status"`
+	CreatedAt      time.Time       `json:"created_at"`
+	UpdatedAt      time.Time       `json:"updated_at"`
+	DeletedAt      sql.NullTime    `json:"deleted_at"`
+	Version        int32           `json:"version"`
+	Name           sql.NullString  `json:"name"`
+	Price          sql.NullFloat64 `json:"price"`
+}
+
+type Provider struct {
+	ID        uint64         `json:"id"`
+	Name      string         `json:"name"`
+	Link      string         `json:"link"`
+	ApiKey    string         `json:"api_key"`
+	ApiID     sql.NullString `json:"api_id"`
+	Status    string         `json:"status"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt sql.NullTime   `json:"deleted_at"`
+	Version   int32          `json:"version"`
+}
+
+type Service struct {
+	ID                uint64       `json:"id"`
+	Name              string       `json:"name"`
+	Min               int32        `json:"min"`
+	Max               int32        `json:"max"`
+	Price             float64      `json:"price"`
+	Margin            float64      `json:"margin"`
+	ServiceCategoryID uint64       `json:"service_category_id"`
+	ProviderID        uint64       `json:"provider_id"`
+	Status            string       `json:"status"`
+	CreatedAt         time.Time    `json:"created_at"`
+	UpdatedAt         time.Time    `json:"updated_at"`
+	DeletedAt         sql.NullTime `json:"deleted_at"`
+	Version           int32        `json:"version"`
+}
+
+type ServiceCategory struct {
+	ID        uint64       `json:"id"`
+	Name      string       `json:"name"`
+	Status    string       `json:"status"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+	Version   int32        `json:"version"`
+}
+
+type ServiceRecomendation struct {
+	ID        uint64       `json:"id"`
+	ServiceID uint64       `json:"service_id"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
+	DeletedAt sql.NullTime `json:"deleted_at"`
+	Version   int32        `json:"version"`
+}
+
+type Ticket struct {
+	ID               uint64       `json:"id"`
+	UserID           uint32       `json:"user_id"`
+	TicketCategoryID uint64       `json:"ticket_category_id"`
+	Title            string       `json:"title"`
+	Description      string       `json:"description"`
+	Status           string       `json:"status"`
+	CreatedAt        time.Time    `json:"created_at"`
+	UpdatedAt        time.Time    `json:"updated_at"`
+	DeletedAt        sql.NullTime `json:"deleted_at"`
+	Version          int32        `json:"version"`
+}
+
+type TicketCategory struct {
+	ID          uint64       `json:"id"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Status      string       `json:"status"`
+	CreatedAt   time.Time    `json:"created_at"`
+	UpdatedAt   time.Time    `json:"updated_at"`
+	DeletedAt   sql.NullTime `json:"deleted_at"`
+	Version     int32        `json:"version"`
+}
+
 type User struct {
 	ID                    uint32       `json:"id"`
 	UserStatusID          uint32       `json:"user_status_id"`

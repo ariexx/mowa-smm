@@ -7,7 +7,102 @@ package db
 
 import (
 	"context"
+	"database/sql"
+	"time"
 )
+
+const getAdmins = `-- name: GetAdmins :many
+SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin'
+`
+
+type GetAdminsRow struct {
+	FullName        string       `json:"full_name"`
+	Email           string       `json:"email"`
+	Status          UsersStatus  `json:"status"`
+	EmailVerifiedAt sql.NullTime `json:"email_verified_at"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
+}
+
+func (q *Queries) GetAdmins(ctx context.Context) ([]GetAdminsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAdmins)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAdminsRow
+	for rows.Next() {
+		var i GetAdminsRow
+		if err := rows.Scan(
+			&i.FullName,
+			&i.Email,
+			&i.Status,
+			&i.EmailVerifiedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getLastOrders = `-- name: GetLastOrders :many
+SELECT o.id, o.total, o.status, o.created_at, o.updated_at, u.full_name, u.email, o.name, o.price FROM orders o JOIN users u ON o.user_id = u.id ORDER BY o.created_at DESC LIMIT ?
+`
+
+type GetLastOrdersRow struct {
+	ID        uint64          `json:"id"`
+	Total     uint64          `json:"total"`
+	Status    string          `json:"status"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	FullName  string          `json:"full_name"`
+	Email     string          `json:"email"`
+	Name      sql.NullString  `json:"name"`
+	Price     sql.NullFloat64 `json:"price"`
+}
+
+// Join Order with User
+func (q *Queries) GetLastOrders(ctx context.Context, limit int32) ([]GetLastOrdersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getLastOrders, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetLastOrdersRow
+	for rows.Next() {
+		var i GetLastOrdersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Total,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FullName,
+			&i.Email,
+			&i.Name,
+			&i.Price,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getStatistics = `-- name: GetStatistics :one
 SELECT COUNT(*) AS total_users FROM users

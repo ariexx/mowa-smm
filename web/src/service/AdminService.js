@@ -3,7 +3,7 @@ import axios from 'axios';
 export const AdminService = {
     async getStatisticsData() {
         try {
-            const response = await axios.get(`/api/v1/admin/dashboard-statistic`);
+            const response = await axios.get(`/api/v1/admin/dashboard`);
             return response.data;
         } catch (error) {
             console.error('There was a problem with the axios operation:', error);

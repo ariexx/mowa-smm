@@ -2,6 +2,7 @@ package services
 
 import (
 	"mowa-backend/api/dto"
+	"mowa-backend/api/utils"
 	db "mowa-backend/db/sqlc"
 	"mowa-backend/internal/database"
 
@@ -11,14 +12,14 @@ import (
 
 type AdminService interface {
 	DashboardStatistics(ctx *fiber.Ctx) (dto.DashboardResponse, error)
-	GetLastOrder(ctx *fiber.Ctx) (dto.GetLastOrderResponse, error)
+	GetLastOrder(ctx *fiber.Ctx, limit int32) ([]dto.GetLastOrderResponse, error)
+	GetAdmins(ctx *fiber.Ctx) ([]db.GetAdminsRow, error)
 }
 
 type adminService struct {
 	*db.Queries
 	log LoggerService
 }
-
 
 func NewAdminService() AdminService {
 	return &adminService{
@@ -45,15 +46,37 @@ func (a *adminService) DashboardStatistics(ctx *fiber.Ctx) (dto.DashboardRespons
 	}, nil
 }
 
-
 // GetLastOrder implements AdminService.
-func (a *adminService) GetLastOrder(ctx *fiber.Ctx) (dto.GetLastOrderResponse, error) {
-	order, err := a.Queries.GetLastOrder(ctx.Context())
+func (a *adminService) GetLastOrder(ctx *fiber.Ctx, limit int32) ([]dto.GetLastOrderResponse, error) {
+	orders, err := a.Queries.GetLastOrders(ctx.Context(), limit)
 	if err != nil {
 		a.log.PrintStdout(ctx.Context(), zapcore.ErrorLevel, "Failed to get last order", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
-		return dto.GetLastOrderResponse{}, nil
+		return nil, nil
 	}
 
-	return dto.GetLastOrderResponse{
-	}, nil
+	result := make([]dto.GetLastOrderResponse, 0)
+	for _, v := range orders {
+		result = append(result, dto.GetLastOrderResponse{
+			Name:    v.FullName,
+			Product: v.Name.String,
+			Total:   int64(v.Total),
+			Price:   int64(v.Price.Float64),
+			Status:  utils.Status(v.Status),
+			Date:    v.CreatedAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	return result, nil
+}
+
+// GetAdmins implements AdminService.
+// Subtle: this method shadows the method (*Queries).GetAdmins of adminService.Queries.
+func (a *adminService) GetAdmins(ctx *fiber.Ctx) ([]db.GetAdminsRow, error) {
+	admins, err := a.Queries.GetAdmins(ctx.Context())
+	if err != nil {
+		a.log.PrintStdout(ctx.Context(), zapcore.ErrorLevel, "Failed to get admins", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
+		return nil, err
+	}
+
+	return admins, nil
 }
