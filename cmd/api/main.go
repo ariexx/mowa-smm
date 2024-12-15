@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"mowa-backend/internal/server"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -21,7 +20,7 @@ func initializeServer() *server.FiberServer {
 }
 
 func startServer(fiberServer *server.FiberServer) {
-	err := fiberServer.Listen(fmt.Sprintf(":%d", os.Getenv("PORT")))
+	err := fiberServer.Listen(fmt.Sprintf(":%s", "9090"))
 	if err != nil {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}
