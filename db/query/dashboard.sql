@@ -2,7 +2,9 @@
 SELECT COUNT(*) AS total_users FROM users;
 
 -- name: GetAdmins :many
-SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin';
+-- With Pagination
+-- SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin';
+SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin' LIMIT ? OFFSET ?;
 
 -- name: GetLastOrders :many
 -- Join Order with User

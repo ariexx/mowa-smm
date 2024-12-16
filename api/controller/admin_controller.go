@@ -4,6 +4,7 @@ import (
 	"mowa-backend/api/dto"
 	"mowa-backend/api/services"
 	"mowa-backend/api/utils"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -45,12 +46,37 @@ func (a *adminController) Route(router fiber.Router) {
 
 // GetAdmins - get all admins role
 func (a *adminController) GetAdmins(c *fiber.Ctx) error {
-	admins, err := a.adminService.GetAdmins(c)
+	// Get current page and page size from query parameters
+	currentPage, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || currentPage < 1 {
+		currentPage = 1
+	}
+
+	pageSize, err := strconv.Atoi(c.Query("page_size", "10"))
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	// Fetch admins from the service
+	admins, err := a.adminService.GetAdmins(c, currentPage, pageSize)
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(utils.ApiResponseSuccess("success", admins))
+	// Calculate total pages
+	totalRecords := len(admins)
+	totalPages := (totalRecords + pageSize - 1) / pageSize
+
+	// Create pagination metadata
+	pagination := &utils.PaginationMetadata{
+		TotalRecords: totalRecords,
+		TotalPages:   totalPages,
+		CurrentPage:  currentPage,
+		PageSize:     pageSize,
+	}
+
+	// Return paginated response
+	return c.JSON(utils.ApiResponseSuccessWithPagination( "success", admins, pagination))
 }
 
 // GetLastOrders - get last orders with limit.

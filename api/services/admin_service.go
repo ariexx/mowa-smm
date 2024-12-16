@@ -13,7 +13,7 @@ import (
 type AdminService interface {
 	DashboardStatistics(ctx *fiber.Ctx) (dto.DashboardResponse, error)
 	GetLastOrder(ctx *fiber.Ctx, limit int32) ([]dto.GetLastOrderResponse, error)
-	GetAdmins(ctx *fiber.Ctx) ([]db.GetAdminsRow, error)
+	GetAdmins(ctx *fiber.Ctx, currentPage int, pageSize int) ([]db.GetAdminsRow, error)
 }
 
 type adminService struct {
@@ -71,8 +71,11 @@ func (a *adminService) GetLastOrder(ctx *fiber.Ctx, limit int32) ([]dto.GetLastO
 
 // GetAdmins implements AdminService.
 // Subtle: this method shadows the method (*Queries).GetAdmins of adminService.Queries.
-func (a *adminService) GetAdmins(ctx *fiber.Ctx) ([]db.GetAdminsRow, error) {
-	admins, err := a.Queries.GetAdmins(ctx.Context())
+func (a *adminService) GetAdmins(ctx *fiber.Ctx, currentPage int, pageSize int) ([]db.GetAdminsRow, error) {
+	admins, err := a.Queries.GetAdmins(ctx.Context(), db.GetAdminsParams{
+		Limit:  int32(pageSize),
+		Offset: int32((currentPage - 1) * pageSize),
+	})
 	if err != nil {
 		a.log.PrintStdout(ctx.Context(), zapcore.ErrorLevel, "Failed to get admins", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
 		return nil, err

@@ -7,6 +7,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 )
 
 type DBTX interface {
@@ -20,12 +21,258 @@ func New(db DBTX) *Queries {
 	return &Queries{db: db}
 }
 
+func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
+	q := Queries{db: db}
+	var err error
+	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
+	}
+	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
+	}
+	if q.getAdminsStmt, err = db.PrepareContext(ctx, getAdmins); err != nil {
+		return nil, fmt.Errorf("error preparing query GetAdmins: %w", err)
+	}
+	if q.getLastOrdersStmt, err = db.PrepareContext(ctx, getLastOrders); err != nil {
+		return nil, fmt.Errorf("error preparing query GetLastOrders: %w", err)
+	}
+	if q.getStatisticsStmt, err = db.PrepareContext(ctx, getStatistics); err != nil {
+		return nil, fmt.Errorf("error preparing query GetStatistics: %w", err)
+	}
+	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
+	}
+	if q.getUserByEmailStmt, err = db.PrepareContext(ctx, getUserByEmail); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByEmail: %w", err)
+	}
+	if q.getUserByEmailAndPasswordStmt, err = db.PrepareContext(ctx, getUserByEmailAndPassword); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByEmailAndPassword: %w", err)
+	}
+	if q.getUserByIdStmt, err = db.PrepareContext(ctx, getUserById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserById: %w", err)
+	}
+	if q.getUserByIdAndVersionStmt, err = db.PrepareContext(ctx, getUserByIdAndVersion); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByIdAndVersion: %w", err)
+	}
+	if q.getUserByPhoneNumberStmt, err = db.PrepareContext(ctx, getUserByPhoneNumber); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserByPhoneNumber: %w", err)
+	}
+	if q.getUsersStmt, err = db.PrepareContext(ctx, getUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
+	}
+	if q.isUserActiveStmt, err = db.PrepareContext(ctx, isUserActive); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserActive: %w", err)
+	}
+	if q.isUserAdminStmt, err = db.PrepareContext(ctx, isUserAdmin); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserAdmin: %w", err)
+	}
+	if q.isUserDeletedStmt, err = db.PrepareContext(ctx, isUserDeleted); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserDeleted: %w", err)
+	}
+	if q.isUserEmailExistsStmt, err = db.PrepareContext(ctx, isUserEmailExists); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserEmailExists: %w", err)
+	}
+	if q.isUserEmailVerifiedStmt, err = db.PrepareContext(ctx, isUserEmailVerified); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserEmailVerified: %w", err)
+	}
+	if q.isUserPhoneNumberExistsStmt, err = db.PrepareContext(ctx, isUserPhoneNumberExists); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserPhoneNumberExists: %w", err)
+	}
+	if q.isUserPhoneNumberVerifiedStmt, err = db.PrepareContext(ctx, isUserPhoneNumberVerified); err != nil {
+		return nil, fmt.Errorf("error preparing query IsUserPhoneNumberVerified: %w", err)
+	}
+	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
+	}
+	return &q, nil
+}
+
+func (q *Queries) Close() error {
+	var err error
+	if q.createUserStmt != nil {
+		if cerr := q.createUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
+		}
+	}
+	if q.deleteUserStmt != nil {
+		if cerr := q.deleteUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
+		}
+	}
+	if q.getAdminsStmt != nil {
+		if cerr := q.getAdminsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getAdminsStmt: %w", cerr)
+		}
+	}
+	if q.getLastOrdersStmt != nil {
+		if cerr := q.getLastOrdersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getLastOrdersStmt: %w", cerr)
+		}
+	}
+	if q.getStatisticsStmt != nil {
+		if cerr := q.getStatisticsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getStatisticsStmt: %w", cerr)
+		}
+	}
+	if q.getUserStmt != nil {
+		if cerr := q.getUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+		}
+	}
+	if q.getUserByEmailStmt != nil {
+		if cerr := q.getUserByEmailStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByEmailStmt: %w", cerr)
+		}
+	}
+	if q.getUserByEmailAndPasswordStmt != nil {
+		if cerr := q.getUserByEmailAndPasswordStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByEmailAndPasswordStmt: %w", cerr)
+		}
+	}
+	if q.getUserByIdStmt != nil {
+		if cerr := q.getUserByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByIdStmt: %w", cerr)
+		}
+	}
+	if q.getUserByIdAndVersionStmt != nil {
+		if cerr := q.getUserByIdAndVersionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByIdAndVersionStmt: %w", cerr)
+		}
+	}
+	if q.getUserByPhoneNumberStmt != nil {
+		if cerr := q.getUserByPhoneNumberStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserByPhoneNumberStmt: %w", cerr)
+		}
+	}
+	if q.getUsersStmt != nil {
+		if cerr := q.getUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUsersStmt: %w", cerr)
+		}
+	}
+	if q.isUserActiveStmt != nil {
+		if cerr := q.isUserActiveStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserActiveStmt: %w", cerr)
+		}
+	}
+	if q.isUserAdminStmt != nil {
+		if cerr := q.isUserAdminStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserAdminStmt: %w", cerr)
+		}
+	}
+	if q.isUserDeletedStmt != nil {
+		if cerr := q.isUserDeletedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserDeletedStmt: %w", cerr)
+		}
+	}
+	if q.isUserEmailExistsStmt != nil {
+		if cerr := q.isUserEmailExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserEmailExistsStmt: %w", cerr)
+		}
+	}
+	if q.isUserEmailVerifiedStmt != nil {
+		if cerr := q.isUserEmailVerifiedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserEmailVerifiedStmt: %w", cerr)
+		}
+	}
+	if q.isUserPhoneNumberExistsStmt != nil {
+		if cerr := q.isUserPhoneNumberExistsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserPhoneNumberExistsStmt: %w", cerr)
+		}
+	}
+	if q.isUserPhoneNumberVerifiedStmt != nil {
+		if cerr := q.isUserPhoneNumberVerifiedStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing isUserPhoneNumberVerifiedStmt: %w", cerr)
+		}
+	}
+	if q.updateUserStmt != nil {
+		if cerr := q.updateUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
+		}
+	}
+	return err
+}
+
+func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
+	switch {
+	case stmt != nil && q.tx != nil:
+		return q.tx.StmtContext(ctx, stmt).ExecContext(ctx, args...)
+	case stmt != nil:
+		return stmt.ExecContext(ctx, args...)
+	default:
+		return q.db.ExecContext(ctx, query, args...)
+	}
+}
+
+func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
+	switch {
+	case stmt != nil && q.tx != nil:
+		return q.tx.StmtContext(ctx, stmt).QueryContext(ctx, args...)
+	case stmt != nil:
+		return stmt.QueryContext(ctx, args...)
+	default:
+		return q.db.QueryContext(ctx, query, args...)
+	}
+}
+
+func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) *sql.Row {
+	switch {
+	case stmt != nil && q.tx != nil:
+		return q.tx.StmtContext(ctx, stmt).QueryRowContext(ctx, args...)
+	case stmt != nil:
+		return stmt.QueryRowContext(ctx, args...)
+	default:
+		return q.db.QueryRowContext(ctx, query, args...)
+	}
+}
+
 type Queries struct {
-	db DBTX
+	db                            DBTX
+	tx                            *sql.Tx
+	createUserStmt                *sql.Stmt
+	deleteUserStmt                *sql.Stmt
+	getAdminsStmt                 *sql.Stmt
+	getLastOrdersStmt             *sql.Stmt
+	getStatisticsStmt             *sql.Stmt
+	getUserStmt                   *sql.Stmt
+	getUserByEmailStmt            *sql.Stmt
+	getUserByEmailAndPasswordStmt *sql.Stmt
+	getUserByIdStmt               *sql.Stmt
+	getUserByIdAndVersionStmt     *sql.Stmt
+	getUserByPhoneNumberStmt      *sql.Stmt
+	getUsersStmt                  *sql.Stmt
+	isUserActiveStmt              *sql.Stmt
+	isUserAdminStmt               *sql.Stmt
+	isUserDeletedStmt             *sql.Stmt
+	isUserEmailExistsStmt         *sql.Stmt
+	isUserEmailVerifiedStmt       *sql.Stmt
+	isUserPhoneNumberExistsStmt   *sql.Stmt
+	isUserPhoneNumberVerifiedStmt *sql.Stmt
+	updateUserStmt                *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db: tx,
+		db:                            tx,
+		tx:                            tx,
+		createUserStmt:                q.createUserStmt,
+		deleteUserStmt:                q.deleteUserStmt,
+		getAdminsStmt:                 q.getAdminsStmt,
+		getLastOrdersStmt:             q.getLastOrdersStmt,
+		getStatisticsStmt:             q.getStatisticsStmt,
+		getUserStmt:                   q.getUserStmt,
+		getUserByEmailStmt:            q.getUserByEmailStmt,
+		getUserByEmailAndPasswordStmt: q.getUserByEmailAndPasswordStmt,
+		getUserByIdStmt:               q.getUserByIdStmt,
+		getUserByIdAndVersionStmt:     q.getUserByIdAndVersionStmt,
+		getUserByPhoneNumberStmt:      q.getUserByPhoneNumberStmt,
+		getUsersStmt:                  q.getUsersStmt,
+		isUserActiveStmt:              q.isUserActiveStmt,
+		isUserAdminStmt:               q.isUserAdminStmt,
+		isUserDeletedStmt:             q.isUserDeletedStmt,
+		isUserEmailExistsStmt:         q.isUserEmailExistsStmt,
+		isUserEmailVerifiedStmt:       q.isUserEmailVerifiedStmt,
+		isUserPhoneNumberExistsStmt:   q.isUserPhoneNumberExistsStmt,
+		isUserPhoneNumberVerifiedStmt: q.isUserPhoneNumberVerifiedStmt,
+		updateUserStmt:                q.updateUserStmt,
 	}
 }

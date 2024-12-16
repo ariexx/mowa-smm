@@ -5,8 +5,9 @@ import "reflect"
 type EmptyObject map[string]string
 
 type ResponseSuccess struct {
-	Status string `json:"status"`
-	Data   any    `json:"data"`
+	Status     string             `json:"status"`
+	Data       interface{}        `json:"data"`
+	Pagination *PaginationMetadata `json:"pagination,omitempty"`
 }
 
 type ResponseError struct {
@@ -23,6 +24,13 @@ type ResponseFail struct {
 	Message  string `json:"message"`
 }
 
+type PaginationMetadata struct {
+	TotalRecords int `json:"total_records"`
+	TotalPages   int `json:"total_pages"`
+	CurrentPage  int `json:"current_page"`
+	PageSize     int `json:"page_size"`
+}
+
 // ApiResponseSuccess is a function to return response success
 func ApiResponseSuccess(status string, data any) *ResponseSuccess {
 	// return empty string if data is nil
@@ -36,6 +44,22 @@ func ApiResponseSuccess(status string, data any) *ResponseSuccess {
 	return &ResponseSuccess{
 		Status: status,
 		Data:   data,
+	}
+}
+
+// ApiResponseSuccessWithPagination is a function to return response success with pagination
+func ApiResponseSuccessWithPagination(status string, data interface{}, pagination *PaginationMetadata) *ResponseSuccess {
+	if isNilFixed(data) {
+		data = EmptyObject{}
+	}
+	// return array if data is empty
+	if isArrayEmpty(data) {
+		data = []EmptyObject{}
+	}
+	return &ResponseSuccess{
+		Status:     status,
+		Data:       data,
+		Pagination: pagination,
 	}
 }
 

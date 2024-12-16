@@ -12,8 +12,13 @@ import (
 )
 
 const getAdmins = `-- name: GetAdmins :many
-SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin'
+SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin' LIMIT ? OFFSET ?
 `
+
+type GetAdminsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
 
 type GetAdminsRow struct {
 	FullName        string       `json:"full_name"`
@@ -24,8 +29,10 @@ type GetAdminsRow struct {
 	UpdatedAt       time.Time    `json:"updated_at"`
 }
 
-func (q *Queries) GetAdmins(ctx context.Context) ([]GetAdminsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAdmins)
+// With Pagination
+// SELECT full_name, email, status, email_verified_at, created_at, updated_at FROM users WHERE role = 'admin';
+func (q *Queries) GetAdmins(ctx context.Context, arg GetAdminsParams) ([]GetAdminsRow, error) {
+	rows, err := q.query(ctx, q.getAdminsStmt, getAdmins, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +79,7 @@ type GetLastOrdersRow struct {
 
 // Join Order with User
 func (q *Queries) GetLastOrders(ctx context.Context, limit int32) ([]GetLastOrdersRow, error) {
-	rows, err := q.db.QueryContext(ctx, getLastOrders, limit)
+	rows, err := q.query(ctx, q.getLastOrdersStmt, getLastOrders, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +116,7 @@ SELECT COUNT(*) AS total_users FROM users
 `
 
 func (q *Queries) GetStatistics(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getStatistics)
+	row := q.queryRow(ctx, q.getStatisticsStmt, getStatistics)
 	var total_users int64
 	err := row.Scan(&total_users)
 	return total_users, err

@@ -1,4 +1,6 @@
 version: "2"
+cloud:
+  project: "01JF71JZTBBXG13Z358TWV1V46"
 sql:
   - engine: "mysql"
     queries: "./db/query/*.sql"
@@ -6,5 +8,6 @@ sql:
     gen:
       go:
         emit_json_tags: true
+        emit_prepared_queries: true
         package: "db"
         out: "./db/sqlc"

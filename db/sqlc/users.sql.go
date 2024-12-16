@@ -36,7 +36,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
-	_, err := q.db.ExecContext(ctx, createUser,
+	_, err := q.exec(ctx, q.createUserStmt, createUser,
 		arg.ID,
 		arg.UserStatusID,
 		arg.UserTypeID,
@@ -62,7 +62,7 @@ DELETE FROM users WHERE id = ?
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id uint32) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	_, err := q.exec(ctx, q.deleteUserStmt, deleteUser, id)
 	return err
 }
 
@@ -71,7 +71,7 @@ SELECT id, user_status_id, user_type_id, full_name, email, password, phone_numbe
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uint32) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUser, id)
+	row := q.queryRow(ctx, q.getUserStmt, getUser, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -99,7 +99,7 @@ SELECT id, user_status_id, user_type_id, full_name, email, password, phone_numbe
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	row := q.queryRow(ctx, q.getUserByEmailStmt, getUserByEmail, email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -132,7 +132,7 @@ type GetUserByEmailAndPasswordParams struct {
 }
 
 func (q *Queries) GetUserByEmailAndPassword(ctx context.Context, arg GetUserByEmailAndPasswordParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByEmailAndPassword, arg.Email, arg.Password)
+	row := q.queryRow(ctx, q.getUserByEmailAndPasswordStmt, getUserByEmailAndPassword, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -160,7 +160,7 @@ SELECT id, user_status_id, user_type_id, full_name, email, password, phone_numbe
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id uint32) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
+	row := q.queryRow(ctx, q.getUserByIdStmt, getUserById, id)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -193,7 +193,7 @@ type GetUserByIdAndVersionParams struct {
 }
 
 func (q *Queries) GetUserByIdAndVersion(ctx context.Context, arg GetUserByIdAndVersionParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByIdAndVersion, arg.ID, arg.Version)
+	row := q.queryRow(ctx, q.getUserByIdAndVersionStmt, getUserByIdAndVersion, arg.ID, arg.Version)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -221,7 +221,7 @@ SELECT id, user_status_id, user_type_id, full_name, email, password, phone_numbe
 `
 
 func (q *Queries) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByPhoneNumber, phoneNumber)
+	row := q.queryRow(ctx, q.getUserByPhoneNumberStmt, getUserByPhoneNumber, phoneNumber)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -249,7 +249,7 @@ SELECT id, user_status_id, user_type_id, full_name, email, password, phone_numbe
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getUsers)
+	rows, err := q.query(ctx, q.getUsersStmt, getUsers)
 	if err != nil {
 		return nil, err
 	}
@@ -293,7 +293,7 @@ SELECT status = 'active' AS is_active FROM users WHERE id = ?
 `
 
 func (q *Queries) IsUserActive(ctx context.Context, id uint32) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserActive, id)
+	row := q.queryRow(ctx, q.isUserActiveStmt, isUserActive, id)
 	var is_active bool
 	err := row.Scan(&is_active)
 	return is_active, err
@@ -304,7 +304,7 @@ SELECT role = 'admin' AS is_admin FROM users WHERE id = ?
 `
 
 func (q *Queries) IsUserAdmin(ctx context.Context, id uint32) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserAdmin, id)
+	row := q.queryRow(ctx, q.isUserAdminStmt, isUserAdmin, id)
 	var is_admin bool
 	err := row.Scan(&is_admin)
 	return is_admin, err
@@ -315,7 +315,7 @@ SELECT deleted_at IS NOT NULL AS is_deleted FROM users WHERE id = ?
 `
 
 func (q *Queries) IsUserDeleted(ctx context.Context, id uint32) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserDeleted, id)
+	row := q.queryRow(ctx, q.isUserDeletedStmt, isUserDeleted, id)
 	var is_deleted bool
 	err := row.Scan(&is_deleted)
 	return is_deleted, err
@@ -326,7 +326,7 @@ SELECT EXISTS(SELECT 1 FROM users WHERE email = ?) AS email_exists
 `
 
 func (q *Queries) IsUserEmailExists(ctx context.Context, email string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserEmailExists, email)
+	row := q.queryRow(ctx, q.isUserEmailExistsStmt, isUserEmailExists, email)
 	var email_exists bool
 	err := row.Scan(&email_exists)
 	return email_exists, err
@@ -337,7 +337,7 @@ SELECT email_verified_at IS NOT NULL AS is_email_verified FROM users WHERE id = 
 `
 
 func (q *Queries) IsUserEmailVerified(ctx context.Context, id uint32) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserEmailVerified, id)
+	row := q.queryRow(ctx, q.isUserEmailVerifiedStmt, isUserEmailVerified, id)
 	var is_email_verified bool
 	err := row.Scan(&is_email_verified)
 	return is_email_verified, err
@@ -348,7 +348,7 @@ SELECT EXISTS(SELECT 1 FROM users WHERE phone_number = ?) AS phone_number_exists
 `
 
 func (q *Queries) IsUserPhoneNumberExists(ctx context.Context, phoneNumber string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserPhoneNumberExists, phoneNumber)
+	row := q.queryRow(ctx, q.isUserPhoneNumberExistsStmt, isUserPhoneNumberExists, phoneNumber)
 	var phone_number_exists bool
 	err := row.Scan(&phone_number_exists)
 	return phone_number_exists, err
@@ -359,7 +359,7 @@ SELECT phone_number_verified_at IS NOT NULL AS is_phone_number_verified FROM use
 `
 
 func (q *Queries) IsUserPhoneNumberVerified(ctx context.Context, id uint32) (bool, error) {
-	row := q.db.QueryRowContext(ctx, isUserPhoneNumberVerified, id)
+	row := q.queryRow(ctx, q.isUserPhoneNumberVerifiedStmt, isUserPhoneNumberVerified, id)
 	var is_phone_number_verified bool
 	err := row.Scan(&is_phone_number_verified)
 	return is_phone_number_verified, err
@@ -389,7 +389,7 @@ type UpdateUserParams struct {
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
-	_, err := q.db.ExecContext(ctx, updateUser,
+	_, err := q.exec(ctx, q.updateUserStmt, updateUser,
 		arg.UserStatusID,
 		arg.UserTypeID,
 		arg.FullName,

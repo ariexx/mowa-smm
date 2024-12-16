@@ -5,8 +5,6 @@ all: build test
 
 build:
 	@echo "Building..."
-
-
 	@go build -o main.exe cmd/api/main.go
 
 # Run the application
@@ -65,3 +63,15 @@ goose-status:
 goose-validate:
 	@echo "Run goose validate"
 	@goose validate
+
+generate:
+	@echo "Generating SQLC"
+	@make sqlc-generate
+
+sqlc-generate:
+	@echo "Generating SQLC code"
+	@sqlc generate -f $(CURDIR)/sqlc.yml
+
+air:
+	@echo "Running air in cmd/api"
+	@cd cmd/api/ && air
