@@ -21,7 +21,7 @@ type JAPProviderService struct {
 func NewJAPProviderService(apiKey string) *JAPProviderService {
 	return &JAPProviderService{
 		APIKey:      "95af236fed2b3365abfe7b567dd5d395",
-		APIURL:      "https://justanotherpanel.com/api/v2",
+		APIURL:      "https://justanotherpanel.com/api/v2xxx",
 		Queries:     db.New(database.New().DB()),
 		restyClient: resty.New(),
 		logService:  NewLoggerService(),

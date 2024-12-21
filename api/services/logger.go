@@ -4,6 +4,7 @@ import (
 	"context"
 	db "mowa-backend/db/sqlc"
 	"os"
+	"strconv"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -37,39 +38,39 @@ func isProduction() bool {
 }
 
 func (l *loggerService) PrintStdout(ctx context.Context, level zapcore.Level, message string, fields ...zapcore.Field) {
-    // Add context fields
-    requestID, ok := ctx.Value("requestid").(string)
-    if !ok {
-        requestID = "unknown"
-    }
+	// Add context fields
+	requestID, ok := ctx.Value("requestid").(string)
+	if !ok {
+		requestID = "unknown"
+	}
 
-    user, ok := ctx.Value("user").(db.User)
-    if !ok {
-        user = db.User{ID: 0}
-    }
-    userID := user.ID
+	user, ok := ctx.Value("user").(db.User)
+	if !ok {
+		user = db.User{ID: 0}
+	}
+	userID := user.ID
 
-    domain, ok := ctx.Value("domain").(string)
-    if ok {
-        l.log.Info("domain", zap.String("domain", domain))
-    }
+	domain, ok := ctx.Value("domain").(string)
+	if ok {
+		l.log.Info("domain", zap.String("domain", domain))
+	}
 
-    fields = append(fields, zap.String("request_id", requestID))
-    fields = append(fields, zap.Field{Key: "user_id", Type: zapcore.StringType, String: string(userID)})
-    fields = append(fields, zap.String("domain", domain))
+	fields = append(fields, zap.String("request_id", requestID))
+	fields = append(fields, zap.Field{Key: "user_id", Type: zapcore.StringType, String: strconv.Itoa(int(userID))})
+	fields = append(fields, zap.String("domain", domain))
 
-    switch level {
-    case zapcore.DebugLevel:
-        l.log.Debug(message, fields...)
-    case zapcore.InfoLevel:
-        l.log.Info(message, fields...)
-    case zapcore.WarnLevel:
-        l.log.Warn(message, fields...)
-    case zapcore.ErrorLevel:
-        l.log.Error(message, fields...)
-    default:
-        l.log.Info(message, fields...)
-    }
+	switch level {
+	case zapcore.DebugLevel:
+		l.log.Debug(message, fields...)
+	case zapcore.InfoLevel:
+		l.log.Info(message, fields...)
+	case zapcore.WarnLevel:
+		l.log.Warn(message, fields...)
+	case zapcore.ErrorLevel:
+		l.log.Error(message, fields...)
+	default:
+		l.log.Info(message, fields...)
+	}
 }
 func (l *loggerService) handleError(ctx context.Context, err error) {
 	if err != nil {
