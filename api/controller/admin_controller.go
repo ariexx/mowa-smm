@@ -14,16 +14,20 @@ type AdminController interface {
 	DashboardStatistics(c *fiber.Ctx) error
 	GetAdmins(c *fiber.Ctx) error
 	GetLastOrders(c *fiber.Ctx) error
+
+	// JAP Handler
+	GetJAPBalance(c *fiber.Ctx) error
 }
 
 type adminController struct {
 	adminService services.AdminService
+	japProvider  services.JAPProviderService
 }
-
 
 func NewAdminController(adminService services.AdminService) AdminController {
 	return &adminController{
 		adminService: adminService,
+		japProvider:  utils.UnPtr(services.NewJAPProviderService("")),
 	}
 }
 
@@ -42,6 +46,11 @@ func (a *adminController) Route(router fiber.Router) {
 	router.Get("/dashboard", a.DashboardStatistics)
 	router.Get("/admins", a.GetAdmins)
 	router.Get("/last-orders", a.GetLastOrders)
+
+	japRouter := router.Group("/jap")
+	{
+		japRouter.Get("/balance", a.GetJAPBalance)
+	}
 }
 
 // GetAdmins - get all admins role
@@ -76,7 +85,7 @@ func (a *adminController) GetAdmins(c *fiber.Ctx) error {
 	}
 
 	// Return paginated response
-	return c.JSON(utils.ApiResponseSuccessWithPagination( "success", admins, pagination))
+	return c.JSON(utils.ApiResponseSuccessWithPagination("success", admins, pagination))
 }
 
 // GetLastOrders - get last orders with limit.
@@ -92,4 +101,13 @@ func (a *adminController) GetLastOrders(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(utils.ApiResponseSuccess("success", orders))
+}
+
+func (a *adminController) GetJAPBalance(c *fiber.Ctx) error {
+	balance, err := a.japProvider.Balance()
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(utils.ApiResponseSuccess("success", balance))
 }

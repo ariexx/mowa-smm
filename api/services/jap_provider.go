@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+	"go.uber.org/zap/zapcore"
 	"mowa-backend/api/utils"
 	db "mowa-backend/db/sqlc"
 	"mowa-backend/internal/database"
@@ -13,14 +15,16 @@ type JAPProviderService struct {
 	APIURL string
 	*db.Queries
 	restyClient *resty.Client
+	logService  LoggerService
 }
 
 func NewJAPProviderService(apiKey string) *JAPProviderService {
 	return &JAPProviderService{
-		APIKey:      apiKey,
+		APIKey:      "95af236fed2b3365abfe7b567dd5d395",
 		APIURL:      "https://justanotherpanel.com/api/v2",
 		Queries:     db.New(database.New().DB()),
 		restyClient: resty.New(),
+		logService:  NewLoggerService(),
 	}
 }
 
@@ -189,6 +193,7 @@ func (j *JAPProviderService) Balance() (JAPBalanceResponse, error) {
 		SetResult(&JAPBalanceResponse{}).
 		Post(j.APIURL)
 	if err != nil {
+		j.logService.PrintStdout(context.Background(), zapcore.ErrorLevel, "Error getting balance", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
 		return JAPBalanceResponse{}, err
 	}
 
