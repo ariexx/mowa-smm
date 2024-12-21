@@ -76,6 +76,7 @@ func (a *adminService) GetAdmins(ctx *fiber.Ctx, currentPage int, pageSize int) 
 		Limit:  int32(pageSize),
 		Offset: int32((currentPage - 1) * pageSize),
 	})
+
 	if err != nil {
 		a.log.PrintStdout(ctx.Context(), zapcore.ErrorLevel, "Failed to get admins", zapcore.Field{Key: "error", Type: zapcore.StringType, String: err.Error()})
 		return nil, err

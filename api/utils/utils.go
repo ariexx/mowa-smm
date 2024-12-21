@@ -11,23 +11,23 @@ var (
 )
 
 var (
-	StatusPending = "1"
-	StatusCompleted = "2"
-	StatusCancelled = "3"
-	StatusRejected = "4"
-	StatusExpired = "5"
+	StatusPending    = "1"
+	StatusCompleted  = "2"
+	StatusCancelled  = "3"
+	StatusRejected   = "4"
+	StatusExpired    = "5"
 	StatusProcessing = "6"
-	StatusPartial = "7"
-	StatusFailed = "8"
+	StatusPartial    = "7"
+	StatusFailed     = "8"
 
-	StatusPendingText = "Pending"
-	StatusCompletedText = "Completed"
-	StatusCancelledText = "Cancelled"
-	StatusRejectedText = "Rejected"
-	StatusExpiredText = "Expired"
+	StatusPendingText    = "Pending"
+	StatusCompletedText  = "Completed"
+	StatusCancelledText  = "Cancelled"
+	StatusRejectedText   = "Rejected"
+	StatusExpiredText    = "Expired"
 	StatusProcessingText = "Processing"
-	StatusPartialText = "Partial"
-	StatusFailedText = "Failed"
+	StatusPartialText    = "Partial"
+	StatusFailedText     = "Failed"
 )
 
 func MapError(err error) error {
@@ -61,4 +61,12 @@ func Status(status string) string {
 	default:
 		return "Status Not Found"
 	}
+}
+
+func UnPtr[A any](a *A) A {
+	return *a
+}
+
+func Ptr[A any](a A) *A {
+	return &a
 }

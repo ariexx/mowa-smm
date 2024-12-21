@@ -24,8 +24,14 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.createProviderStmt, err = db.PrepareContext(ctx, createProvider); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateProvider: %w", err)
+	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
+	}
+	if q.deleteServiceByIDStmt, err = db.PrepareContext(ctx, deleteServiceByID); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteServiceByID: %w", err)
 	}
 	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
@@ -35,6 +41,21 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getLastOrdersStmt, err = db.PrepareContext(ctx, getLastOrders); err != nil {
 		return nil, fmt.Errorf("error preparing query GetLastOrders: %w", err)
+	}
+	if q.getProviderByIDStmt, err = db.PrepareContext(ctx, getProviderByID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetProviderByID: %w", err)
+	}
+	if q.getProvidersStmt, err = db.PrepareContext(ctx, getProviders); err != nil {
+		return nil, fmt.Errorf("error preparing query GetProviders: %w", err)
+	}
+	if q.getServiceByIDStmt, err = db.PrepareContext(ctx, getServiceByID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetServiceByID: %w", err)
+	}
+	if q.getServicesStmt, err = db.PrepareContext(ctx, getServices); err != nil {
+		return nil, fmt.Errorf("error preparing query GetServices: %w", err)
+	}
+	if q.getServicesByProviderIDStmt, err = db.PrepareContext(ctx, getServicesByProviderID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetServicesByProviderID: %w", err)
 	}
 	if q.getStatisticsStmt, err = db.PrepareContext(ctx, getStatistics); err != nil {
 		return nil, fmt.Errorf("error preparing query GetStatistics: %w", err)
@@ -60,6 +81,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getUsersStmt, err = db.PrepareContext(ctx, getUsers); err != nil {
 		return nil, fmt.Errorf("error preparing query GetUsers: %w", err)
 	}
+	if q.insertBatchProvidersStmt, err = db.PrepareContext(ctx, insertBatchProviders); err != nil {
+		return nil, fmt.Errorf("error preparing query InsertBatchProviders: %w", err)
+	}
 	if q.isUserActiveStmt, err = db.PrepareContext(ctx, isUserActive); err != nil {
 		return nil, fmt.Errorf("error preparing query IsUserActive: %w", err)
 	}
@@ -81,6 +105,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.isUserPhoneNumberVerifiedStmt, err = db.PrepareContext(ctx, isUserPhoneNumberVerified); err != nil {
 		return nil, fmt.Errorf("error preparing query IsUserPhoneNumberVerified: %w", err)
 	}
+	if q.updateServiceByIDStmt, err = db.PrepareContext(ctx, updateServiceByID); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateServiceByID: %w", err)
+	}
 	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
 	}
@@ -89,9 +116,19 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.createProviderStmt != nil {
+		if cerr := q.createProviderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createProviderStmt: %w", cerr)
+		}
+	}
 	if q.createUserStmt != nil {
 		if cerr := q.createUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
+		}
+	}
+	if q.deleteServiceByIDStmt != nil {
+		if cerr := q.deleteServiceByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteServiceByIDStmt: %w", cerr)
 		}
 	}
 	if q.deleteUserStmt != nil {
@@ -107,6 +144,31 @@ func (q *Queries) Close() error {
 	if q.getLastOrdersStmt != nil {
 		if cerr := q.getLastOrdersStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getLastOrdersStmt: %w", cerr)
+		}
+	}
+	if q.getProviderByIDStmt != nil {
+		if cerr := q.getProviderByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getProviderByIDStmt: %w", cerr)
+		}
+	}
+	if q.getProvidersStmt != nil {
+		if cerr := q.getProvidersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getProvidersStmt: %w", cerr)
+		}
+	}
+	if q.getServiceByIDStmt != nil {
+		if cerr := q.getServiceByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getServiceByIDStmt: %w", cerr)
+		}
+	}
+	if q.getServicesStmt != nil {
+		if cerr := q.getServicesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getServicesStmt: %w", cerr)
+		}
+	}
+	if q.getServicesByProviderIDStmt != nil {
+		if cerr := q.getServicesByProviderIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getServicesByProviderIDStmt: %w", cerr)
 		}
 	}
 	if q.getStatisticsStmt != nil {
@@ -149,6 +211,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getUsersStmt: %w", cerr)
 		}
 	}
+	if q.insertBatchProvidersStmt != nil {
+		if cerr := q.insertBatchProvidersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing insertBatchProvidersStmt: %w", cerr)
+		}
+	}
 	if q.isUserActiveStmt != nil {
 		if cerr := q.isUserActiveStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing isUserActiveStmt: %w", cerr)
@@ -182,6 +249,11 @@ func (q *Queries) Close() error {
 	if q.isUserPhoneNumberVerifiedStmt != nil {
 		if cerr := q.isUserPhoneNumberVerifiedStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing isUserPhoneNumberVerifiedStmt: %w", cerr)
+		}
+	}
+	if q.updateServiceByIDStmt != nil {
+		if cerr := q.updateServiceByIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateServiceByIDStmt: %w", cerr)
 		}
 	}
 	if q.updateUserStmt != nil {
@@ -228,10 +300,17 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                            DBTX
 	tx                            *sql.Tx
+	createProviderStmt            *sql.Stmt
 	createUserStmt                *sql.Stmt
+	deleteServiceByIDStmt         *sql.Stmt
 	deleteUserStmt                *sql.Stmt
 	getAdminsStmt                 *sql.Stmt
 	getLastOrdersStmt             *sql.Stmt
+	getProviderByIDStmt           *sql.Stmt
+	getProvidersStmt              *sql.Stmt
+	getServiceByIDStmt            *sql.Stmt
+	getServicesStmt               *sql.Stmt
+	getServicesByProviderIDStmt   *sql.Stmt
 	getStatisticsStmt             *sql.Stmt
 	getUserStmt                   *sql.Stmt
 	getUserByEmailStmt            *sql.Stmt
@@ -240,6 +319,7 @@ type Queries struct {
 	getUserByIdAndVersionStmt     *sql.Stmt
 	getUserByPhoneNumberStmt      *sql.Stmt
 	getUsersStmt                  *sql.Stmt
+	insertBatchProvidersStmt      *sql.Stmt
 	isUserActiveStmt              *sql.Stmt
 	isUserAdminStmt               *sql.Stmt
 	isUserDeletedStmt             *sql.Stmt
@@ -247,6 +327,7 @@ type Queries struct {
 	isUserEmailVerifiedStmt       *sql.Stmt
 	isUserPhoneNumberExistsStmt   *sql.Stmt
 	isUserPhoneNumberVerifiedStmt *sql.Stmt
+	updateServiceByIDStmt         *sql.Stmt
 	updateUserStmt                *sql.Stmt
 }
 
@@ -254,10 +335,17 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                            tx,
 		tx:                            tx,
+		createProviderStmt:            q.createProviderStmt,
 		createUserStmt:                q.createUserStmt,
+		deleteServiceByIDStmt:         q.deleteServiceByIDStmt,
 		deleteUserStmt:                q.deleteUserStmt,
 		getAdminsStmt:                 q.getAdminsStmt,
 		getLastOrdersStmt:             q.getLastOrdersStmt,
+		getProviderByIDStmt:           q.getProviderByIDStmt,
+		getProvidersStmt:              q.getProvidersStmt,
+		getServiceByIDStmt:            q.getServiceByIDStmt,
+		getServicesStmt:               q.getServicesStmt,
+		getServicesByProviderIDStmt:   q.getServicesByProviderIDStmt,
 		getStatisticsStmt:             q.getStatisticsStmt,
 		getUserStmt:                   q.getUserStmt,
 		getUserByEmailStmt:            q.getUserByEmailStmt,
@@ -266,6 +354,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getUserByIdAndVersionStmt:     q.getUserByIdAndVersionStmt,
 		getUserByPhoneNumberStmt:      q.getUserByPhoneNumberStmt,
 		getUsersStmt:                  q.getUsersStmt,
+		insertBatchProvidersStmt:      q.insertBatchProvidersStmt,
 		isUserActiveStmt:              q.isUserActiveStmt,
 		isUserAdminStmt:               q.isUserAdminStmt,
 		isUserDeletedStmt:             q.isUserDeletedStmt,
@@ -273,6 +362,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		isUserEmailVerifiedStmt:       q.isUserEmailVerifiedStmt,
 		isUserPhoneNumberExistsStmt:   q.isUserPhoneNumberExistsStmt,
 		isUserPhoneNumberVerifiedStmt: q.isUserPhoneNumberVerifiedStmt,
+		updateServiceByIDStmt:         q.updateServiceByIDStmt,
 		updateUserStmt:                q.updateUserStmt,
 	}
 }

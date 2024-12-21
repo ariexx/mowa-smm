@@ -175,6 +175,8 @@ type Service struct {
 	UpdatedAt         time.Time    `json:"updated_at"`
 	DeletedAt         sql.NullTime `json:"deleted_at"`
 	Version           int32        `json:"version"`
+	IsRefill          sql.NullBool `json:"is_refill"`
+	IsCancelable      sql.NullBool `json:"is_cancelable"`
 }
 
 type ServiceCategory struct {
@@ -257,4 +259,23 @@ type UserType struct {
 	UpdatedAt   time.Time    `json:"updated_at"`
 	DeletedAt   sql.NullTime `json:"deleted_at"`
 	Version     int32        `json:"version"`
+}
+
+type WalletActType struct {
+	ID          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type WalletJournal struct {
+	ID          uint64       `json:"id"`
+	ActTypeID   uint64       `json:"act_type_id"`
+	UserID      uint32       `json:"user_id"`
+	Amount      int32        `json:"amount"`
+	Balance     int32        `json:"balance"`
+	TrxType     string       `json:"trx_type"`
+	Description string       `json:"description"`
+	Status      string       `json:"status"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
 }
